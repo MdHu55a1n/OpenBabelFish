@@ -4,23 +4,29 @@ from pathlib import Path
 
 def get_openbabelfish_home() -> Path:
     """
-    Resolve the OpenBabelFish home directory with a zero-disruption search order:
+    Resolve the OpenBabelFish home directory with a priority on local portability:
     1. OPENBABELFISH_HOME environment variable
-    2. Legacy local directory (if config.json or models/ exists in package)
-    3. User home directory ~/.openbabelfish (Default)
+    2. Current Working Directory (if it looks like an OpenBabelFish project root)
+    3. Project Root (parent of the package directory)
+    4. User home directory ~/.openbabelfish (Default fallback)
     """
     # 1. Environment Variable Override
     env_home = os.environ.get("OPENBABELFISH_HOME")
     if env_home:
         return Path(env_home).absolute()
 
-    # 2. Legacy / Portable Mode Check
-    # Priority given to existing installations in the package directory
-    package_dir = Path(__file__).parent
-    if (package_dir / "config.json").exists() or (package_dir / "models").exists():
-        return package_dir
+    # 2. Portable/Local Detection (CWD)
+    # If run from the root of the repo, prefer local storage
+    cwd = Path.cwd()
+    if (cwd / "pyproject.toml").exists() or (cwd / "openbabelfish").exists() or (cwd / "models").exists():
+        return cwd.absolute()
 
-    # 3. Standard User Directory
+    # 3. Project-relative Detection (Package Parent)
+    package_root = Path(__file__).parent.parent
+    if (package_root / "pyproject.toml").exists() or (package_root / "models").exists():
+        return package_root.absolute()
+
+    # 4. Standard User Directory Fallback
     user_home = Path.home() / ".openbabelfish"
     return user_home.absolute()
 

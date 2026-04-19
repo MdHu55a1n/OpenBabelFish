@@ -13,7 +13,7 @@ from rich import box
 from rich.align import Align
 import shlex
 
-from .config import is_setup_complete, load_config, save_config, get_model_path
+from .config import is_setup_complete, load_config, save_config, get_model_path, BASE_DIR
 from .engine import TranslationEngine
 from .managers import DependencyManager, ModelManager, VARIANT_INFO
 
@@ -151,8 +151,8 @@ def handle_first_run():
     console.clear()
     _print_logo()
     console.print(Panel(
-        "[bold bright_cyan]Welcome to OpenBabelFish![/]\n"
-        "[dim]Let's configure your offline translation engine.[/dim]",
+        f"[bold bright_cyan]Welcome to OpenBabelFish![/]\n"
+        f"[dim]Storage Location: [cyan]{BASE_DIR}[/][/dim]",
         box=box.DOUBLE_EDGE,
         border_style="cyan",
         expand=False,
@@ -405,7 +405,8 @@ def interactive_shell():
         Text.assemble(
             ("Session Active ", "bold bright_black"),
             (f"[{active_model}] ", "bold cyan"),
-            (f"[{active_device}]", "bold green")
+            (f"[{active_device}] ", "bold green"),
+            (f"({BASE_DIR})", "dim italic")
         ),
         (0, 2)
     ))
@@ -502,6 +503,7 @@ def _handle_models_command(model_mgr, config):
         t.add_row(v, status, info, active_mark)
 
     console.print(Padding(t, (1, 2)))
+    console.print(Padding(f"[dim]Library Path: [cyan]{BASE_DIR}[/][/dim]", (0, 2)))
     console.print(Padding("[dim]Use [cyan]--add-model[/cyan] to download more. Use [cyan]--model[/cyan] to switch.[/dim]", (0, 2)))
     console.print()
 
